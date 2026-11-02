@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幾 A 幾 B - V4 個人 Google 帳號雲端版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-grad-1: #0f172a;
+            --bg-grad-2: #1e1b4b;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.35);
+            --primary-hover: #4f46e5;
+            --accent: #f59e0b;
+            --accent-glow: rgba(245, 158, 11, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --success-glow: rgba(16, 185, 129, 0.2);
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.2);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-grad-1), var(--bg-grad-2));
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            padding: 32px 28px;
+        }
+
+        .header { text-align: center; margin-bottom: 24px; }
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .header p { font-size: 0.875rem; color: var(--text-muted); }
+
+        .btn {
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-hover)); color: white; box-shadow: 0 4px 15px var(--primary-glow); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--text-main); border: 1px solid var(--card-border); }
+
+        .debug-switch {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .debug-banner {
+            background: var(--accent-glow);
+            border: 1px solid rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+            padding: 12px 16px;
+            border-radius: 14px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .input-group { display: flex; gap: 10px; margin-bottom: 16px; }
+        .input-group input {
+            flex: 1;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            text-align: center;
+            font-size: 1.25rem;
+            color: var(--text-main);
+            letter-spacing: 4px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .message {
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: none;
+            text-align: center;
+        }
+        .message.error { display: block; background: var(--danger-glow); color: #fca5a5; }
+        .message.success { display: block; background: var(--success-glow); color: #6ee7b7; }
+
+        .game-section { border-top: 1px solid var(--card-border); padding-top: 20px; max-height: 340px; overflow-y: auto; }
+        .game-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .game-card.active { background: rgba(30, 41, 59, 0.8); border-color: rgba(99, 102, 241, 0.5); }
+
+        .game-header { display: flex; justify-content: space-between; font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; }
+        .status-tag { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; }
+        .status-tag.playing { background: var(--primary-glow); color: #a5b4fc; }
+        .status-tag.win { background: var(--success-glow); color: #6ee7b7; }
+        .status-tag.unfinished { background: var(--danger-glow); color: #fca5a5; }
+
+        .history-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .history-item { display: flex; justify-content: space-between; font-size: 0.875rem; padding: 8px 12px; background: rgba(255, 255, 255, 0.03); border-radius: 10px; }
+        .badge-ab { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 2px 8px; border-radius: 6px; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>幾 A 幾 B (V4 個人雲端版)</h1>
+        <p>自動同步至您個人 Google 雲端硬碟試算表</p>
+    </div>
+
+    <label class="debug-switch">
+        <span>開啟 Debug 除錯透視模式</span>
+        <input type="checkbox" id="debugToggle" onchange="toggleDebug()">
+    </label>
+
+    <div id="debugPanel" class="debug-banner">
+        🔑 個人雲端目前局答案：<span id="answerDisplay" style="font-size:1.1rem; letter-spacing:2px;">****</span>
+    </div>
+
+    <div class="input-group">
+        <input type="text" id="guessInput" maxlength="4" placeholder="0123">
+        <button class="btn btn-primary" onclick="submitGuess()">送出猜測</button>
+        <button class="btn btn-secondary" onclick="startNewGame()">開新局</button>
+    </div>
+
+    <div id="msg" class="message"></div>
+
+    <div class="game-section">
+        <div id="gamesContainer"></div>
+    </div>
+</div>
+
+<script>
+    // 已自動替換為你最新的 V4 /exec 網址
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwYqKWm8wJtI7fiRxeZIOwUovM2GThdIX-WvVqeBysS3gP-tc7tQPBu_1DeBDglnXisGg/exec"; 
+
+    let games = [];
+
+    window.onload = function() {
+        loadUserCloudData();
+    };
+
+    function generateAnswer() {
+        let digits = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        digits.sort(() => Math.random() - 0.5);
+        return digits.slice(0, 4).join("");
+    }
+
+    function isValidInput(str) {
+        if (str.length !== 4) return false;
+        if (!/^\d{4}$/.test(str)) return false;
+        return new Set(str).size === 4;
+    }
+
+    function calculateAB(secret, guess) {
+        let a = 0, b = 0;
+        for (let i = 0; i < 4; i++) {
+            if (guess[i] === secret[i]) a++;
+            else if (secret.includes(guess[i])) b++;
+        }
+        return `${a}A${b}B`;
+    }
+
+    function toggleDebug() {
+        let isChecked = document.getElementById("debugToggle").checked;
+        document.getElementById("debugPanel").style.display = isChecked ? "block" : "none";
+    }
+
+    async function postData(data) {
+        let resp = await fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify(data),
+            redirect: "follow"
+        });
+        return await resp.json();
+    }
+
+    async function loadUserCloudData() {
+        setMessage("⚡ 自動載入個人 Google 雲端資料中...", "success");
+
+        try {
+            let res = await postData({ action: "load" });
+
+            if (res.status === "success") {
+                games = res.games.reverse();
+                if (games.length === 0) {
+                    startNewGame();
+                } else {
+                    document.getElementById("answerDisplay").innerText = games[0].answer;
+                    render();
+                    setMessage("✨ 已成功連線至您的個人雲端硬碟！", "success");
+                }
+            } else {
+                setMessage("❌ 存取失敗：" + (res.message || "未知錯誤"), "error");
+            }
+        } catch (err) {
+            setMessage("❌ 連線失敗，請檢查 GAS 部署權限設定。", "error");
+        }
+    }
+
+    async function saveCurrentGameToCloud(game) {
+        try {
+            await postData({ action: "save", game: game });
+        } catch (e) {
+            console.error("雲端存檔失敗", e);
+        }
+    }
+
+    function startNewGame() {
+        if (games.length > 0 && games[0].status === "進行中") {
+            games[0].status = "未完成";
+            saveCurrentGameToCloud(games[0]);
+        }
+
+        let newGame = {
+            id: games.length + 1,
+            answer: generateAnswer(),
+            status: "進行中",
+            guesses: []
+        };
+
+        games.unshift(newGame);
+        document.getElementById("answerDisplay").innerText = newGame.answer;
+        
+        saveCurrentGameToCloud(newGame);
+        toggleDebug();
+        clearMessage();
+        render();
+    }
+
+    async function submitGuess() {
+        if (games.length === 0) return;
+        let currentGame = games[0];
+
+        if (currentGame.status !== "進行中") {
+            setMessage("💡 本局已結束，請點擊「開新局」。", "error");
+            return;
+        }
+
+        let inputEl = document.getElementById("guessInput");
+        let guess = inputEl.value.trim();
+
+        if (!isValidInput(guess)) {
+            setMessage("⚠️ 請輸入 4 位不重複數字！", "error");
+            return;
+        }
+
+        clearMessage();
+        let result = calculateAB(currentGame.answer, guess);
+        let timeStr = new Date().toLocaleTimeString();
+
+        currentGame.guesses.push({
+            count: currentGame.guesses.length + 1,
+            val: guess,
+            result: result,
+            time: timeStr
+        });
+
+        if (result === "4A0B") {
+            currentGame.status = "完成";
+            setMessage("🎉 太棒了！答對了並同步至個人雲端！", "success");
+        }
+
+        render();
+        saveCurrentGameToCloud(currentGame);
+        inputEl.value = "";
+    }
+
+    function render() {
+        let container = document.getElementById("gamesContainer");
+        container.innerHTML = "";
+
+        games.forEach((game) => {
+            let card = document.createElement("div");
+            let isCurrent = (game === games[0]);
+            card.className = `game-card ${isCurrent ? 'active' : ''}`;
+            let statusClass = game.status === '完成' ? 'win' : (game.status === '進行中' ? 'playing' : 'unfinished');
+
+            let historyHtml = game.guesses.map(g => `
+                <li class="history-item">
+                    <span>第 ${g.count} 次猜測：<strong>${g.val}</strong></span>
+                    <span class="badge-ab">${g.result}</span>
+                </li>
+            `).join("");
+
+            card.innerHTML = `
+                <div class="game-header">
+                    <span>🎮 第 ${game.id} 局</span>
+                    <span class="status-tag ${statusClass}">${game.status}</span>
+                </div>
+                <ul class="history-list">
+                    ${historyHtml.length > 0 ? historyHtml : '<li class="history-item" style="color:var(--text-muted);">尚無猜測紀錄</li>'}
+                </ul>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function setMessage(msg, type) {
+        let msgEl = document.getElementById("msg");
+        msgEl.innerText = msg;
+        msgEl.className = "message " + type;
+    }
+
+    function clearMessage() {
+        let msgEl = document.getElementById("msg");
+        msgEl.innerText = "";
+        msgEl.className = "message";
+    }
+
+    document.getElementById("guessInput").addEventListener("keyup", function(e) {
+        if (e.key === "Enter") submitGuess();
+    });
+</script>
+
+</body>
+</html>
